@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <attr name="maxHeight" format="dimension"/>
+
+    <declare-styleable name="FixHeightListView">
+        <attr name="maxHeight"/>
+    </declare-styleable>
+
+    <declare-styleable name="FixHeightGirdView">
+        <attr name="maxHeight"/>
+    </declare-styleable>
+</resources>

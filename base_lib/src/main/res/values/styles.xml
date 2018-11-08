@@ -1,0 +1,8 @@
+<resources>
+
+    <style name="theme_no_frame" parent="android:Theme.Dialog">
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowBackground">@color/transparency</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+</resources>

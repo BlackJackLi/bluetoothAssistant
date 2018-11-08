@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">BluetoothAssistant</string>
+    <string name="refresh">刷新设备</string>
+</resources>

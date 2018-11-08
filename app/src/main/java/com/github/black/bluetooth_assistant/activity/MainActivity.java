@@ -81,7 +81,6 @@ public class MainActivity extends BaseActivity {
 
 	@Override
 	protected void onDestroy() {
-		stopService(new Intent(this, BluetoothAssistantService.class));
 		super.onDestroy();
 
 	}

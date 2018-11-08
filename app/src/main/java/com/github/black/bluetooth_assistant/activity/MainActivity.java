@@ -2,7 +2,10 @@ package com.github.black.bluetooth_assistant.activity;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.bluetooth.BluetoothA2dp;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -11,24 +14,51 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.view.View;
+import android.widget.ListView;
 
 import com.github.black.bluetooth_assistant.R;
+import com.github.black.bluetooth_assistant.adapter.A2dpDeviceAdapter;
+import com.github.black.bluetooth_assistant.common.ConfigSp;
 import com.github.black.bluetooth_assistant.service.BluetoothAssistantService;
 import com.github.black.bluetooth_assistant.utils.PermissionUtil;
 import com.gizwits.energy.android.lib.base.BaseActivity;
 
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.Event;
-import org.xutils.x;
+import org.xutils.view.annotation.ViewInject;
+
+import java.util.List;
 
 @ContentView(R.layout.activity_main)
 public class MainActivity extends BaseActivity {
 
+	@ViewInject(R.id.lv_a2dp_device)
+	private ListView lv_a2dp_device;
+
+	private A2dpDeviceAdapter a2dpDeviceAdapter;
+
 	private boolean isAllGranted = false;
+
+	private BluetoothAdapter bluetoothAdapter;
+
+	private BluetoothA2dp bluetoothA2dp;
+
+	private ConfigSp configSp;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		configSp = new ConfigSp(this);
+		a2dpDeviceAdapter = new A2dpDeviceAdapter(this);
+		lv_a2dp_device.setAdapter(a2dpDeviceAdapter);
+
+		bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+		if (bluetoothAdapter != null) {
+			initA2dpProfileListener();
+		}
+
 	}
 
 	@Override
@@ -78,14 +108,34 @@ public class MainActivity extends BaseActivity {
 
 	@Event(R.id.btn_refresh)
 	private void refresh(View v) {
-		stopService(new Intent(this, BluetoothAssistantService.class));
+		if (bluetoothA2dp != null) {
+			updateA2dpList(bluetoothA2dp.getDevicesMatchingConnectionStates(new int[]{BluetoothA2dp.STATE_CONNECTED, BluetoothA2dp.STATE_DISCONNECTED,
+					BluetoothA2dp.STATE_CONNECTING, BluetoothA2dp.STATE_DISCONNECTING}));
+		}
+	}
 
-		x.task().postDelayed(new Runnable() {
+	private void initA2dpProfileListener() {
+		bluetoothAdapter.getProfileProxy(this, new BluetoothProfile.ServiceListener() {
 			@Override
-			public void run() {
-				startService(new Intent(MainActivity.this, BluetoothAssistantService.class));
+			public void onServiceConnected(int profile, BluetoothProfile proxy) {
+				bluetoothA2dp = (BluetoothA2dp) proxy;
+				updateA2dpList(bluetoothA2dp.getDevicesMatchingConnectionStates(new int[]{BluetoothA2dp.STATE_CONNECTED, BluetoothA2dp.STATE_DISCONNECTED,
+						BluetoothA2dp.STATE_CONNECTING, BluetoothA2dp.STATE_DISCONNECTING}));
 			}
-		}, 5000);
+
+			@Override
+			public void onServiceDisconnected(int profile) {
+
+			}
+		}, BluetoothProfile.A2DP);
+	}
+
+	private void updateA2dpList(List<BluetoothDevice> bluetoothDevices) {
+		a2dpDeviceAdapter.clear();
+		for (BluetoothDevice device : bluetoothDevices) {
+			a2dpDeviceAdapter.add(new A2dpDeviceAdapter.A2dpDeviceItem(device.getAddress(), device.getName(), configSp.getDeviceMusicVol(device.getAddress()
+			)));
+		}
 	}
 
 	/**
@@ -93,26 +143,21 @@ public class MainActivity extends BaseActivity {
 	 */
 	private void openAppDetails() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("蓝牙助手以下权限: “大致位置(蓝牙发现设备)” 和 “外部存储器” 才能正常运行，请到 “应用信息 -> 权限” 中授予！");
-		builder.setPositiveButton("去手动授权", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				Intent intent = new Intent();
-				intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-				intent.addCategory(Intent.CATEGORY_DEFAULT);
-				intent.setData(Uri.parse("package:" + getPackageName()));
-				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-				intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-				startActivity(intent);
-			}
+		builder.setMessage(R.string.manual_authorize_tips);
+		builder.setPositiveButton(R.string.go_to_manual_authorize, (dialog, which) -> {
+			Intent intent = new Intent();
+			intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+			intent.addCategory(Intent.CATEGORY_DEFAULT);
+			intent.setData(Uri.parse("package:" + getPackageName()));
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+			intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+			startActivity(intent);
 		});
+
 		builder.setCancelable(false);
-		builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				finish();
-			}
+		builder.setNegativeButton(R.string.cancel, (dialog, which) -> {
+			finish();
 		});
 		builder.show();
 	}

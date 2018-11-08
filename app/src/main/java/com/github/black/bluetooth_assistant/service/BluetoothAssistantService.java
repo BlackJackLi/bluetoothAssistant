@@ -150,8 +150,6 @@ public class BluetoothAssistantService extends Service {
 			case BluetoothA2dp.STATE_CONNECTED: {
 				Log.d(TAG, "device a2dp connected");
 				List<BluetoothDevice> devices = bluetoothA2dp.getConnectedDevices();
-//				List<BluetoothDevice> devices = bluetoothA2dp.getDevicesMatchingConnectionStates(new int[]{BluetoothA2dp.STATE_CONNECTED, BluetoothA2dp
-//						.STATE_CONNECTING, BluetoothA2dp.STATE_DISCONNECTED});
 
 				if (devices.contains(device)) {
 					int vol = configSp.getDeviceMusicVol(device.getAddress());

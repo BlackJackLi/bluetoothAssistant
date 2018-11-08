@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">BluetoothAssistant</string>
     <string name="refresh">刷新设备</string>
+    <string name="manual_authorize_tips"><![CDATA[蓝牙助手以下权限: “大致位置(蓝牙发现设备)” 和 “外部存储器” 才能正常运行，请到 “应用信息 -> 权限” 中授予！]]></string>
+    <string name="go_to_manual_authorize">去手动授权</string>
+    <string name="cancel">取消</string>
+    <string name="device_name">设备名称</string>
+    <string name="device_mac">设备mac</string>
+    <string name="device_vol">音量</string>
 </resources>

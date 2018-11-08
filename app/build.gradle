@@ -6,7 +6,7 @@ android {
         applicationId "com.github.black.bluetooth_assistant"
         minSdkVersion 22
         targetSdkVersion 27
-        versionCode 181108001
+        versionCode 181109001
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }

@@ -9,11 +9,11 @@ public class ConfigSp extends BaseSPUtil {
 		super(context, "config");
 	}
 
-	public void putDeviceMideaVol(String mac, int vol) {
+	public void putDeviceMusicVol(String mac, int vol) {
 		putInt(mac, vol);
 	}
 
-	public int getDeviceMideaVol(String mac) {
+	public int getDeviceMusicVol(String mac) {
 		return getInt(mac, -1);
 	}
 
